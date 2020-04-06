@@ -1,0 +1,5 @@
+- name: install kubernetes TLS
+  hosts: k8s_master
+  tags: k8s-master
+  roles:  
+    - k8s-tls

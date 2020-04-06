@@ -1,0 +1,14 @@
+- name: install mongodb packages
+  tags: packages
+  package: name={{ item }} state=latest
+  with_items:
+    - mongodb
+    - mongodb-server 
+
+- name: install mongod config
+  tags: config
+  copy: src=mongod.conf dest=/etc/mongod.conf
+
+- name: start mongodb
+  service: name=mongod state=restarted enabled=yes
+  when: not ansible_check_mode

@@ -1,0 +1,90 @@
+- name: install rabbitmq packages
+  tags: packages
+  package: 
+    name: rabbitmq-server 
+    state: latest
+
+- name: destroy rabbitmq data
+  block:
+  - systemd:
+      name: rabbitmq-server
+      state: stopped
+  - file:
+      path: /var/lib/rabbitmq/
+      state: absent
+  - file:
+      path: /var/lib/rabbitmq/
+      state: directory
+      owner: rabbitmq
+      group: rabbitmq
+
+  # - shell: rm -rf /var/lib/rabbitmq/{*,.er*}
+    #shell: service rabbitmq-server stop; rm -rf /var/lib/rabbitmq/{*,.er*}
+  when: destroy_data|bool
+
+- name: copy rabbitmq config
+  tags: config
+  template: 
+    src: rabbitmq.conf.j2 
+    dest: /etc/rabbitmq/rabbitmq.config
+
+- name: copy rabbitmq environment config
+  tags: config
+  template: 
+    src: rabbitmq-env.conf.j2 
+    dest: /etc/rabbitmq/rabbitmq-env.conf
+  when: rabbitmq_longname|bool
+
+- name: start rabbitmq
+  tags: service
+  systemd: 
+    name: rabbitmq-server 
+    state: restarted 
+    enabled: yes
+  when: not ansible_check_mode
+
+- name: get rabbitmq users
+  command: rabbitmqctl list_users
+  register: rabbitmq_users
+
+- name: add rabbitmq user
+  command: rabbitmqctl add_user openstack {{ rabbitmq_password }}
+  when: not ansible_check_mode and rabbitmq_users.stdout.find('openstack') == -1
+
+- name: set rabbitmq permissions
+  command: rabbitmqctl set_permissions openstack ".*" ".*" ".*"
+
+- block:
+  - name: stop rabbitmq
+    service: name=rabbitmq-server state=stopped enabled=yes
+    when: not ansible_check_mode
+
+  - name: fetch cookie from {{ groups['rabbitmq'][0] }}
+    fetch: src=/var/lib/rabbitmq/.erlang.cookie dest={{ inventory_dir }}/workdir/.erlang.cookie flat=yes
+    when: groups['rabbitmq'].index(inventory_hostname) == 0
+
+  - name: put cookie on cluster nodes
+    copy: dest=/var/lib/rabbitmq/.erlang.cookie src={{ inventory_dir }}/workdir/.erlang.cookie owner=rabbitmq group=rabbitmq mode=400
+    when: groups['rabbitmq'].index(inventory_hostname) > 0
+
+  - name: start rabbitmq
+    service: name=rabbitmq-server state=started enabled=yes
+    when: not ansible_check_mode
+
+  - name: create rabbitmq cluster
+    command: rabbitmqctl {{ item }}
+    with_items:
+      - stop_app
+      - join_cluster --ram rabbit@{{ groups['rabbitmq'][0] }}
+      - start_app
+    when: groups['rabbitmq'].index(inventory_hostname) > 0
+
+  - name: ensure ha policy
+    command: "rabbitmqctl set_policy ha-all '^(?!amq\\.).*' '{\"ha-mode\": \"all\"}'"
+    when: groups['rabbitmq'].index(inventory_hostname) == 0
+  when: groups['rabbitmq']|count > 1
+
+- name: check rabbitmq cluster
+  tags: test
+  shell: rabbitmqctl cluster_status | grep running_nodes | grep {{ item }}
+  with_items: "{{ groups['rabbitmq'] }}"

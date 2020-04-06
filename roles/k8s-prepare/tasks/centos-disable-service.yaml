@@ -1,0 +1,44 @@
+- name: disabled to firewalld/NetworkManager service
+  systemd: 
+    name: "{{ item }}"
+    enabled: no
+    state: stopped
+  with_items:
+    - firewalld
+    - NetworkManager
+
+#- name: enable to EPEL repository
+#  yum: 
+#    name: epel-release 
+#    state: latest 
+#    update_cache: yes
+
+- name: install packages for kubernetes service
+  yum: 
+    name: 
+      - bash-completion
+      - kubernetes-master
+      - kubernetes-node
+      - kubernetes-client
+      - kubernetes
+      - openssl
+    state: latest
+    update_cache: yes
+
+- name: install openssl package for kubernetes service
+  yum: 
+    name: 
+      - openssl
+    state: latest
+    update_cache: yes
+
+- name: disable to selinux
+  shell: "setenforce 0"
+  when: disabled_selinux
+
+- name: permanently disable to selinux
+  lineinfile:
+    dest: /etc/selinux/config
+    regexp: "^SELINUX="
+    line: "SELINUX=disabled"
+  when: disabled_selinux

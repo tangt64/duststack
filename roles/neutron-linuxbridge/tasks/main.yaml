@@ -1,0 +1,2 @@
+- import_tasks: neutron-linuxbridge.yaml
+  when: enable_linuxbridge|bool

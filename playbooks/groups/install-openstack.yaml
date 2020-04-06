@@ -1,0 +1,155 @@
+- name: ha
+  hosts: controller
+  tags: ha
+  roles: 
+    - role: ha 
+      when: (groups['controller']|count > 1)
+
+- name: install rabbitmq
+  hosts: rabbitmq
+  tags: rabbitmq
+  roles:
+    - rabbitmq
+
+- name: install mariadb database
+  hosts: database
+  tags: mariadb
+  roles:
+    - database
+
+- name: install mongodb 
+  hosts: database
+  tags: mongodb
+  roles:
+    - mongodb
+
+- name: install memcached
+  hosts: controller
+  tags: memcached
+  roles:
+    - memcached
+
+- name: install keystone identity service
+  hosts: keystone
+  tags: keystone
+  roles:
+    - keystone
+  environment: "{{ openstack_env }}"
+
+- name: install glance image service
+  hosts: glance
+  tags: glance
+  roles:
+    - glance
+  environment: "{{ openstack_env }}"
+
+- name: install nova controller service
+  hosts: controller
+  tags: nova
+  roles:
+    - { role: nova, controller: true }
+  environment: "{{ openstack_env }}"
+
+- name: install nova compute service
+  hosts: nova
+  tags: nova
+  roles:
+    - { role: nova-compute, compute: true }
+  environment: "{{ openstack_env }}"
+
+#- name: discover compute hosts
+#  hosts: nova_controller
+#  tags: nova_controller
+#  tasks:
+#    - command: nova-manage cell_v2 discover_hosts __verbose
+#      become_user: nova
+#      become: true
+#      run_once: true
+#      when: not ansible_check_mode
+#  environment: "{{ openstack_env }}"
+
+- name: install cinder controller service
+  hosts: controller
+  tags: cinder
+  roles:
+    - { role: cinder, controller: true }
+  environment: "{{ openstack_env }}"
+
+- name: install cinder storage service
+  hosts: storage_lvm2
+  tags: cinder
+  roles:
+    - cinder-lvm2
+  environment: "{{ openstack_env }}"
+
+- name: install ceilometer controller service
+  hosts: ceilometer_controller
+  tags: ceilometer
+  roles:
+    - { role: ceilometer, controller: true }
+  environment: "{{ openstack_env }}"
+
+- name: install ceilometer service
+  hosts: ceilometer_nova
+  tags: ceilometer
+  roles:
+    - { role: ceilometer }
+  environment: "{{ openstack_env }}"
+
+- name: install neutron controller service
+  hosts: neutron_controller
+  tags: neutron
+  roles:
+    - { role: neutron, controller: true }
+  environment: "{{ openstack_env }}"
+
+- name: install neutron linuxbridge service
+  hosts: neutron_linuxbridge
+  tags: neutron
+  roles:
+    - { role: neutron-linuxbridge }
+  environment: "{{ openstack_env }}"
+
+- name: install neutron openvswitch service
+  hosts: neutron_openvswitch
+  tags: neutron
+  roles:
+    - { role: neutron-openvswitch }
+  environment: "{{ openstack_env }}"
+
+- name: install swift controller storage
+  hosts: controller
+  tags: swift
+  roles:
+    - { role: swift, controller: true }
+  environment: "{{ openstack_env }}"
+  
+
+- name: install swift object storage
+  hosts: storage_swift
+  tags: swift
+  roles:
+    - { role: swift }
+  environment: "{{ openstack_env }}"
+
+- name: install heat orchestration service
+  hosts: heat
+  tags: heat
+  roles:
+    - { role: heat }
+  environment: "{{ openstack_env }}"
+
+- name: install horizon dashboard
+  hosts: horizon
+  tags: horizon
+  roles:
+    - { role: horizon }
+  environment: "{{ openstack_env }}"
+
+- name: run tests
+  hosts: controller
+  tags: test
+  roles:
+    - { role: tests }
+  environment: "{{ openstack_env }}"
+

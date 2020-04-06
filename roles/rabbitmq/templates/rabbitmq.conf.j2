@@ -1,0 +1,5 @@
+[
+{rabbit, [
+    {tcp_listeners, [{"{{ hostvars[inventory_hostname]['ansible_eth1']['ipv4']['address'] }}", 5672}]}
+  ]}
+].

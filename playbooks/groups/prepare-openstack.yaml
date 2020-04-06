@@ -1,0 +1,6 @@
+- name: prepare 
+  hosts: all
+  tags: prepare 
+  roles:  
+    - prepare 
+  environment: "{{ openstack_env }}"

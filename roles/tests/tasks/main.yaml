@@ -1,0 +1,3 @@
+- import_tasks: test.yaml
+  when: enable_test|bool
+

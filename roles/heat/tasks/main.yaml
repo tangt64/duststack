@@ -1,0 +1,3 @@
+- import_tasks: heat.yaml
+  when: enable_heat|bool
+

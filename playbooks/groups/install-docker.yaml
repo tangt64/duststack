@@ -1,0 +1,5 @@
+- name: install docker on all of nodes
+  hosts: all
+  tags: docker
+  roles:  
+    - docker

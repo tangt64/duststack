@@ -1,0 +1,9 @@
+- import_tasks: controller.yaml
+  when: controller is defined and enable_ceilometer
+
+- import_tasks: aodh.yaml
+  when: controller is defined and enable_aodh
+  tags: aodh
+
+- import_tasks: ceilometer-nova.yaml
+  when: controller is not defined and enable_ceilometer

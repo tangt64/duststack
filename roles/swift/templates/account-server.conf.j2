@@ -1,0 +1,28 @@
+[DEFAULT]
+bind_host = {{ ansible_eth1['ipv4']['address'] }}
+bind_port = 6002
+swift_dir = /etc/swift
+devices = {{ swift_storage_dir }}
+
+[pipeline:main]
+pipeline = healthcheck recon account-server
+
+[app:account-server]
+use = egg:swift#account
+
+[filter:healthcheck]
+use = egg:swift#healthcheck
+
+[filter:recon]
+use = egg:swift#recon
+recon_cache_path = /var/cache/swift
+
+[filter:xprofile]
+use = egg:swift#xprofile
+
+[account-auditor]
+
+[account-replicator]
+
+[account-reaper]
+

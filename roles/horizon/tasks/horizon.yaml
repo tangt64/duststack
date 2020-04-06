@@ -1,0 +1,24 @@
+- name: install packages
+  tags: packages
+  yum: 
+    name: ['openstack-dashboard', 'openstack-neutron-lbaas-ui']
+    state: latest
+
+- name: install horizon configuration
+  tags: config
+  template: 
+    src: "{{ item }}.j2"
+    dest: "/etc/openstack-dashboard/{{ item }}"
+  with_items:
+    - local_settings
+
+- name: start services
+  tags: service
+  systemd: 
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  when: not ansible_check_mode
+  with_items:
+    - memcached
+    - httpd

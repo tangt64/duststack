@@ -1,0 +1,34 @@
+- name: install node
+  yum:
+    name: ['containernetworking-plugins', 'kubernetes-node']
+    state: latest
+
+- name: copy kublet files
+  copy:
+    src: "{{ item }}"
+    dest: "{{ item }}"
+    remote_src: yes
+  with_items:
+    - /etc/kubernetes/pki/ca.crt
+#    - /etc/kubernetes/bootstrap.kubeconfig
+  delegate_to: "{{ groups['k8s_master'][0] }}"
+
+- name: kubelet
+  template: 
+    src: "{{ item.src }}"
+    dest: "{{ item.dest }}/{{ item.src.split('.')[:-1]|join('.') }}"
+  with_items:
+    - { src: 'kubelet-conf.yaml.j2', dest: "/etc/kubernetes/" }
+
+- name: start to kubernetes node service
+  systemd:
+    name: kubelet
+    state: started
+    enabled: true
+
+# name: check to a node in a cluster
+# debug:  
+#   msg: |  
+#     kubectl taint nodes {% for host in groups['k8s_master'] %}{{ hostvars[host].nodename }} {% endfor %}  node-role.kubernetes.io/master="":NoSchedule
+# connection: "{{ groups['k8s_master'][0] }}"
+# when: not ( newNode | default(false) )

@@ -1,0 +1,36 @@
+- name: install packages
+  tags: packages
+  yum:
+    name: ['openstack-neutron', 'openstack-neutron-openvswitch', 'openstack-neutron-lbaas', 'openvswitch', 'openvswitch-controller', 'ebtables', 'ipset', 'haproxy']
+    state: latest
+
+- name: install configurations
+  tags: config
+  template: 
+    src: "{{ item }}.j2" 
+    dest: /etc/neutron/"{{ item }}"
+  with_items:
+    - neutron.conf
+    - lbaas_agent.ini
+
+- name: install configurations
+  tags: config
+  template: 
+    src: linuxbridge_agent.ini.j2 
+    dest: /etc/neutron/plugins/ml2/openvswitch_agent.ini
+
+- name: start services
+  tags: service
+  systemd: 
+    name: "{{ item }}" 
+    state: started 
+    enabled: yes
+  when: not ansible_check_mode
+  with_items:
+    - openstack-nova-compute
+    - openvswitch
+    - ovs-delete-transient-ports
+    - ovs-vswitchd
+    - ovsdb-server
+    - neutron-openvswitch-agent
+    - neutron-lbaasv2-agent

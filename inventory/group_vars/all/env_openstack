@@ -1,0 +1,14 @@
+openstack_env:
+  OS_IDENTITY_API_VERSION: 3
+  OS_URL: http://{{ internal_vip_address|default(groups['controller'][0]) }}:35357/v3
+  OS_AUTH_URL: http://{{ internal_vip_address|default(groups['controller'][0]) }}:35357/v3
+  OS_PROJECT_DOMAIN_NAME: default 
+  OS_USER_DOMAIN_NAME: default 
+  OS_PROJECT_NAME: admin
+  OS_TENANT_NAME: admin
+  OS_USERNAME: admin
+  OS_PASSWORD: "{{ admin_password }}"
+  OS_IMAGE_API_VERSION: 2
+  OS_AUTH_VERSION: 3
+  OS_REGION_NAME: RegionOne
+

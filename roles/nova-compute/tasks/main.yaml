@@ -1,0 +1,2 @@
+- import_tasks: nova-compute.yaml
+  when: compute is defined

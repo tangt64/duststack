@@ -1,0 +1,154 @@
+- name: install packages
+  tags: package
+  yum: 
+    name: ['openstack-swift-account','openstack-swift-container','openstack-swift-object','rsync','xfsprogs','python-memcached']
+    state: latest
+  
+- name: install rsync configuration
+  tags: config
+  template: 
+    src: "{{ item }}.j2" 
+    dest: "/etc/{{ item }}"
+  with_items:
+    - rsyncd.conf
+
+- name: start services
+  tags: service
+  systemd: 
+    name: "{{ item }}"
+    state: restarted 
+    enabled: yes
+  with_items:
+    - rsyncd
+
+- name: install swift configuration
+  tags: config
+  template: 
+    src: "{{ item }}.j2"
+    dest: "/etc/swift/{{ item }}"
+  with_items:
+    - account-server.conf
+    - container-server.conf
+    - object-server.conf
+    - swift.conf
+
+- name: install directories
+  tags: config
+  file: dest={{ swift_storage_dir }} owner=swift group=swift state=directory
+  when: not ansible_check_mode
+
+- name: install directories
+  tags: config
+  file: dest=/var/cache/swift owner=root group=swift state=directory mode=0775
+  when: not ansible_check_mode
+
+- name: prepare storage
+  file: dest={{ swift_storage_dir }}/{{ item|basename }} state=directory owner=swift
+  with_items: "{{ swift_storage_devices }}"
+  when: item.find('/dev') < 0 and not ansible_check_mode
+  
+- name: create filefs
+  command: truncate -s {{ swift_device_size }} {{ item }}
+  with_items: "{{ swift_storage_devices }}"
+  when: item.find('/dev') < 0 and not ansible_check_mode
+
+- name: create xfs filesystem on {{ swift_storage_device }}
+  command: mkfs.xfs -f {{ item }}
+  with_items: "{{ swift_storage_devices }}"
+  when:  not ansible_check_mode
+  ignore_errors: yes
+
+- name: mount
+  mount: name={{ swift_storage_dir }}/{{ item|basename }} src={{ item }} fstype=xfs opts="noatime,nodiratime,nobarrier,logbufs=8" state=mounted
+  with_items: "{{ swift_storage_devices }}"
+  when: not ansible_check_mode
+
+- name: fix permissions
+  file: dest={{ swift_storage_dir }} owner=swift group=swift mode=0775 recurse=yes
+  when: not ansible_check_mode
+
+- name: copy ring config
+  tags: copy
+  copy: src={{ inventory_dir }}/workdir/{{ item }} dest=/etc/swift/{{ item }}
+  with_items:
+    - account.ring.gz
+    - container.ring.gz
+    - object.ring.gz
+
+- block:
+  - name: create the base account.builder
+    command: swift-ring-builder account.builder create 10 {{ swift_replica_count }} 1 chdir=/etc/swift
+
+  - name: create the base container.builder
+    command: swift-ring-builder container.builder create 10 {{ swift_replica_count }} 1 chdir=/etc/swift
+
+  - name: create the base object.builder
+    command: swift-ring-builder object.builder create 10 {{ swift_replica_count }} 1 chdir=/etc/swift
+
+  - name: add each storage node to the ring - account.builder
+    #command: swift-ring-builder account.builder add --region 1 --zone {{ item[2] }} --ip {{ hostvars[inventory_hostname]['ansible_eth1']['ipv4']['address'] }} --port 6002 --device {{ item[1]|basename }} --weight 100 chdir=/etc/swift
+    command: swift-ring-builder account.builder add --region 1 --zone 1 --ip {{ internal_vip_address|default(groups['controller'][0]) }} --port 6002 --device {{ item[1]|basename }} --weight 100 chdir=/etc/swift
+    with_nested:
+      - "{{ groups['swift'] }}"
+      - "{{ swift_storage_devices }}"
+      - "{{ zone_number }}"
+    run_once: true
+  #  with_sequence: count=2
+
+  - name: add each storage node to the ring - container.builder
+    #command: swift-ring-builder container.builder add --region 1 --zone {{ item[2] }} --ip {{ hostvars[inventory_hostname]['ansible_eth1']['ipv4']['address'] }} --port 6001 --device {{ item[1]|basename }} --weight 100 chdir=/etc/swift
+    command: swift-ring-builder container.builder add --region 1 --zone 1 --ip {{ internal_vip_address|default(groups['controller'][0]) }} --port 6001 --device {{ item[1]|basename }} --weight 100 chdir=/etc/swift
+    with_nested:
+      - "{{ groups['swift'] }}"
+      - "{{ swift_storage_devices }}"
+      - "{{ zone_number }}"
+    run_once: true
+  #  with_sequence: count=2
+
+  - name: add each storage node to the ring - object.builder
+    #command: swift-ring-builder object.builder add --region 1 --zone {{ item[2] }} --ip {{ hostvars[inventory_hostname]['ansible_eth1']['ipv4']['address'] }} --port 6000 --device {{ item[1]|basename }} --weight 100 chdir=/etc/swift
+    command: swift-ring-builder object.builder add --region 1 --zone 1 --ip {{ internal_vip_address|default(groups['controller'][0]) }} --port 6000 --device {{ item[1]|basename }} --weight 100 chdir=/etc/swift
+    with_nested:
+      - "{{ groups['swift'] }}"
+      - "{{ swift_storage_devices }}"
+      - "{{ zone_number }}"
+    run_once: true
+#  with_sequence: count=2
+
+- name: rebalance rings
+  command: swift-ring-builder {{ item }} rebalance chdir=/etc/swift
+  with_items:
+    - account.builder
+    - container.builder
+    - object.builder
+
+- name: fetch files
+  tags: fetch
+  fetch: src=/etc/swift/{{ item }} dest={{ inventory_dir }}/workdir/{{ item }} flat=yes
+  with_items:
+    - account.ring.gz
+    - container.ring.gz
+    - object.ring.gz
+
+
+
+
+
+- name: start services
+  tags: service
+  service: name={{ item }} state=restarted enabled=yes
+  when: not ansible_check_mode
+  with_items:
+    - rsyslog
+    - openstack-swift-account
+    - openstack-swift-account-auditor
+    - openstack-swift-account-reaper
+    - openstack-swift-account-replicator
+    - openstack-swift-container
+    - openstack-swift-container-auditor
+    - openstack-swift-container-replicator
+    - openstack-swift-container-updater
+    - openstack-swift-object
+    - openstack-swift-object-auditor
+    - openstack-swift-object-replicator
+    - openstack-swift-object-updater

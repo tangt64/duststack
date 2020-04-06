@@ -1,0 +1,14 @@
+{% set nova_db = ['nova', 'nova_api', 'nova_cell0', 'placement'] %}
+{% for db in nova_db %}
+{% if destroy_data %}
+DROP DATABASE IF EXISTS {{ db }} ;
+{% endif %}
+CREATE DATABASE IF NOT EXISTS {{ db }} ;
+GRANT ALL PRIVILEGES ON {{ db }}.* TO 'nova'@'localhost' IDENTIFIED BY '{{ novadb_password }}';
+GRANT ALL PRIVILEGES ON {{ db }}.* TO 'nova'@'%' IDENTIFIED BY '{{ novadb_password }}';
+GRANT ALL PRIVILEGES ON {{ db }}.* TO 'nova'@'{{ ansible_nodename }}' IDENTIFIED BY '{{ novadb_password }}';
+GRANT ALL PRIVILEGES ON placement.* TO 'placement'@'%' IDENTIFIED BY '{{ novadb_password }}';
+GRANT ALL PRIVILEGES ON placement.* TO 'placement'@'{{ ansible_nodename }}' IDENTIFIED BY '{{ novadb_password }}';
+GRANT ALL PRIVILEGES ON placement.* TO 'placement'@'localhost' IDENTIFIED BY '{{ novadb_password }}';
+{% endfor %}
+

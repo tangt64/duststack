@@ -1,0 +1,5 @@
+- import_tasks: controller.yaml
+  when: controller is defined
+
+#- import_tasks: nova.yaml
+#  when: controller is not defined

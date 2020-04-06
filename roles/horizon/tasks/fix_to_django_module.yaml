@@ -1,0 +1,6 @@
+- name: fix to django name of import module
+  lineinfile:
+    path: /etc/openstack-dashboard/local_settings
+    regexp: 'django.utils.log.NullHandler'
+    line: 'logging.NullHandler'
+    state: present

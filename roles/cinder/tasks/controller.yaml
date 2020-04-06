@@ -1,0 +1,79 @@
+- name: install packages
+  tags: package
+  yum: 
+    name: ['openstack-cinder', 'targetcli', 'python-keystone', 'lvm2']
+    state: latest
+
+- name: install cinder configuration
+  tags: config
+  template: 
+    src: "{{ item }}.j2"
+    dest: "/etc/cinder/{{ item }}"
+  with_items:
+    - cinder.conf
+
+- block:
+  - name: copy db create template
+    template: 
+      src: cinderdb.sql.j2 
+      dest: /tmp/cinderdb.sql
+
+  - name: create database
+    shell : mysql -u root < /tmp/cinderdb.sql
+
+  - name: remove sql
+    file: 
+      path: /tmp/cinderdb.sql 
+      state: absent
+
+  - name: list users
+    command: "openstack user list"
+    register: ulist
+
+  - block:
+      - command: "openstack user create --domain default --password {{ cinder_password }} cinder"
+      - command: "openstack role add --project service --user cinder admin"
+      - command: "openstack service create --name cinder --description 'OpenStack Block Storage service' volume"
+      - command: "openstack service create --name cinderv2 --description 'OpenStack Block Storage service' volumev2"
+      - command: "openstack service create --name cinderv3 --description 'OpenStack Block Storage service' volumev3"
+      - command: "openstack endpoint create --region RegionOne volume {{ item }} http://{{ internal_vip_address|default(groups['controller'][0]) }}:8776/v1/%(project_id)s"
+        with_items:
+          - internal
+          - public
+          - admin
+      - command: "openstack endpoint create --region RegionOne volumev2 {{ item }} http://{{ internal_vip_address|default(groups['controller'][0]) }}:8776/v2/%(project_id)s"
+        with_items:
+          - internal
+          - public
+          - admin
+      - command: "openstack endpoint create --region RegionOne volumev3 {{ item }} http://{{ internal_vip_address|default(groups['controller'][0]) }}:8776/v3/%(project_id)s"
+        with_items:
+          - internal
+          - public
+          - admin
+    when: not ansible_check_mode and ulist.stdout.find("cinder") < 0
+
+  - name: run cinder db sync
+    command: cinder-manage db sync
+    become: true
+    become_user: cinder
+    when: not ansible_check_mode
+  run_once: true
+
+- name: start services
+  tags: service
+  systemd: 
+    name: "{{ item }}"
+    state: restarted 
+    enabled: yes
+  when: not ansible_check_mode
+  with_items:
+    - openstack-cinder-api
+    - openstack-cinder-scheduler
+
+- wait_for: port=8776
+
+- name: test cinder api
+  tags: test
+  shell: cinder list | grep '^| ID'
+  run_once: true

@@ -1,0 +1,9 @@
+- name: start master kubernetes API service
+  systemd:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  with_items:
+    - kube-apiserver
+    - kube-controller-manager
+    - kube-scheduler

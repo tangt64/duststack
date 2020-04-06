@@ -1,0 +1,14 @@
+- name: prepare for classrom
+  become: root
+  hosts: local_server
+  serial: 1
+  tags: classroom
+  roles:  
+    - virt-vms
+
+#- name: SSH user key generator 
+#  hosts: all
+#  serial: 1
+#  tags: sshkeygen
+#  role:
+#    - virt-ssh

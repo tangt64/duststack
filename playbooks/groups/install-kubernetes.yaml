@@ -1,0 +1,18 @@
+- name: install kubernetes TLS
+  hosts: k8s_master
+  tags: k8s-master
+  roles:  
+    - k8s-tls
+
+- name: install kubernetes master nodes
+  hosts: k8s_master
+  tags: k8s-master
+  roles:  
+    - k8s-master
+
+- name: install kubernetes minion nodes
+  hosts: k8s_node
+  tags: k8s-node
+  roles:
+    - k8s-node
+

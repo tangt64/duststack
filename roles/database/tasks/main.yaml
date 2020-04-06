@@ -1,0 +1,47 @@
+- name: install mysql packages
+  tags: packages
+  yum:
+    name: ['mariadb', 'mariadb-server-galera', 'MySQL-python', 'percona-xtrabackup']
+    state: latest
+
+- name: install mariadb config
+  tags: config
+  template: 
+    src: my.cnf.j2 
+    dest: /etc/my.cnf
+
+- name: destroy mariadb data
+  block:
+  - file:
+      path: /var/lib/mysql
+      state: absent
+  - file:
+      path: /var/lib/mysql
+      state: directory
+      owner: mysql
+      group: mysql
+
+- name: start new galera cluster
+  tags: service
+  command: galera_new_cluster
+  when: not ansible_check_mode and (groups['database'].index(inventory_hostname) == 0 and groups['database']|count > 1)
+
+- name: start mariadb
+  tags: service
+  systemd: 
+    name: mariadb 
+    state: restarted 
+    enabled: yes
+  when: not ansible_check_mode and (groups['database'].index(inventory_hostname) > 0 or groups['database']|count < 2)
+
+- name: test mariadb
+  tags: test
+  shell: mysql -u root -e "SHOW STATUS LIKE 'wsrep_cluster_size'" -Ns | cut -f2
+  register: wsrep_cluster_size
+
+- name: check cluster size
+  tags: test
+  debug: 
+    msg: mariadb cluster size is {{ wsrep_cluster_size.stdout }}
+  #failed_when: groups['database']|count != wsrep_cluster_size.stdout 
+  when: not ansible_check_mode

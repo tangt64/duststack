@@ -1,0 +1,24 @@
+- name: install packages
+  tags: package
+  yum: 
+    name: ['openstack-aodh-api', 'openstack-aodh-evaluator', 'openstack-aodh-notifier', 'openstack-aodh-listener', 'openstack-aodh-expirer', 'python-ceilometerclient', 'openstack-ceilometer-compute']
+    state: latest
+
+- name: install configuration
+  tags: config
+  template: 
+    src: "{{ item }}.j2" 
+    dest: "/etc/ceilometer/{{ item }}"
+  with_items:
+    - ceilometer.conf
+    - pipeline.yaml
+
+- name: start services
+  tags: service
+  systemd: 
+    name: "{{ item }}"
+    state: restarted 
+    enabled: yes
+  when: not ansible_check_mode
+  with_items:
+    - openstack-ceilometer-compute

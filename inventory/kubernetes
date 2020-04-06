@@ -1,0 +1,13 @@
+[k8s_master]
+192.168.90.10 hostname=master1 nodename=master1
+
+[k8s_node]
+192.168.90.20 hostname=node1 nodename=node1
+192.168.90.20 hostname=node2 nodename=node2
+
+[k8s_etcd]
+192.168.90.10 hostname=master1
+
+[kubernetes:children]
+k8s_master
+k8s_node

@@ -1,0 +1,5 @@
+- import_tasks: controller.yaml
+  when: controller is defined and enable_swift
+
+- import_tasks: swift.yaml
+  when: controller is not defined and enable_swift

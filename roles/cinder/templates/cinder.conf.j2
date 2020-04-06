@@ -1,0 +1,41 @@
+[DEFAULT]
+
+transport_url = rabbit://{% for host in groups['controller'] %}openstack:{{ rabbitmq_password }}@{{ hostvars[host].ansible_eth1.ipv4.address }}{% if not loop.last %},{% endif %}{% endfor %}
+
+auth_strategy = keystone
+my_ip = {{ ansible_eth1.ipv4.address }}
+enabled_backends = lvm
+glance_api_servers = http://{{ internal_vip_address|default(groups['controller'][0]) }}:9292
+
+
+[lvm]
+volume_driver = cinder.volume.drivers.lvm.LVMVolumeDriver
+volume_group = cinder-volumes
+iscsi_protocol = iscsi
+iscsi_helper = lioadm
+volume_clear=none
+volume_clear_size=0
+
+[database]
+connection = mysql+pymysql://cinder:{{ cinderdb_password }}@{{ internal_vip_address|default(groups['controller'][0]) }}/cinder
+
+[keystone_authtoken]
+auth_uri = http://{{ internal_vip_address|default(groups['controller'][0]) }}:5000
+auth_url = http://{{ internal_vip_address|default(groups['controller'][0]) }}:35357
+auth_type = password
+project_domain_name = default
+user_domain_name = default
+project_name = service
+username = cinder
+password = {{ cinder_password }}
+memcached_servers = {% for host in groups['controller'] %}{{ hostvars[host].ansible_eth1.ipv4.address }}:11211{% if not loop.last %},{% endif %}{% endfor %}
+
+[oslo_concurrency]
+lock_path = /var/lib/cinder/tmp
+
+[oslo_messaging_notifications]
+{% if groups['ceilometer_controller']|count > 0 %}
+driver = messagingv2
+{% else %}
+driver = noop
+{% endif %}

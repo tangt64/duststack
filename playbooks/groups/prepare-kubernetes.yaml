@@ -1,0 +1,11 @@
+- name: prepare 
+  hosts: k8s_etcd
+  tags: k8s-prepare
+  roles:  
+    - { role: k8s-prepare }
+
+- name: install etcd
+  hosts: k8s_etcd
+  tags: k8s-etcd
+  roles:  
+    - { role: etcd, k8s-prepare: true }

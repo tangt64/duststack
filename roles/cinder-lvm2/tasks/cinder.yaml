@@ -1,0 +1,42 @@
+- name: install packages
+  tags: package 
+  yum: 
+    name: ['lvm2', 'openstack-cinder', 'targetcli', 'python-oslo-policy', 'python-keystonemiddleware']
+    state: latest
+
+- name: check to volume group name is "cinder-volumes"
+  shell: vgs | grep cinder-volumes | awk '{ print $1 }'
+  register: vg_name
+
+- name: delete to VG if cinder-volumes have it 
+  lvg:
+    vg: cinder-volumes
+    force: yes
+    state: absent
+  when: vg_name.stdout.find('cinder-volumes')
+
+- name: create volume group
+  lvg:
+    vg: cinder-volumes
+    pvs: "{{ cinder_dev }}"
+    state: present
+
+- name: install cinder configuration
+  tags: config
+  template:
+    src: "{{ item }}.j2"
+    dest: /etc/cinder/{{ item }}
+  with_items:
+    - cinder.conf
+
+- name: start services
+  tags: service
+  systemd:
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  when: not ansible_check_mode
+  with_items:
+    - lvm2-lvmetad
+    - openstack-cinder-volume
+    - target

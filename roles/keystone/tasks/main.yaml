@@ -1,0 +1,99 @@
+- name: install keystone packages
+  yum: 
+    name: ['openstack-keystone', 'httpd', 'mod_wsgi', 'python-memcached']
+    state: latest
+  when: not ansible_check_mode
+
+- name: install keystone configuration
+  tags: config
+  template: 
+    src: keystone.conf.j2 
+    dest: /etc/keystone/keystone.conf
+  when: not ansible_check_mode
+
+- name: install httpd config
+  tags: config
+  copy: 
+    src: wsgi-keystone.conf 
+    dest: /etc/httpd/conf.d/wsgi-keystone.conf
+
+- name: initialize fernet key repositories
+  command: "{{ item }}"
+  with_items:
+  - "keystone-manage fernet_setup --keystone-user keystone --keystone-group keystone"
+  - "keystone-manage credential_setup --keystone-user keystone --keystone-group keystone"
+
+- name: start httpd
+  tags: service
+  systemd: 
+    name: httpd 
+    state: restarted 
+    enabled: yes 
+  when: not ansible_check_mode
+
+- block:
+  - name: copy db create template
+    template: 
+      src: keystonedb.sql.j2 
+      dest: /tmp/keystonedb.sql
+
+  - name: create database
+    shell: mysql -u root < /tmp/keystonedb.sql
+
+  - name: remove sql
+    file: 
+      path: /tmp/keystonedb.sql 
+      state: absent
+
+  - name: run keystone-db sync
+    command: keystone-manage db_sync
+    become: true
+    become_user: keystone
+    when: not ansible_check_mode
+
+  - name: bootstrap the identity service as VIP controller
+    shell:
+      cmd: |
+        keystone-manage bootstrap --bootstrap-password {{ admin_password }} \
+        --bootstrap-admin-url http://{{ internal_vip_address|default(groups['controller'][0]) }}:35357/v3/ \
+        --bootstrap-internal-url http://{{ internal_vip_address|default(groups['controller'][0]) }}:5000/v3/ \
+        --bootstrap-public-url http://{{ internal_vip_address|default(groups['controller'][0]) }}:5000/v3/ \
+        --bootstrap-region-id RegionOne
+    when: groups['controller'][0] | length >= 2
+
+
+  - name: bootstrap the identity service as single controller
+    shell:
+      cmd: |
+        keystone-manage bootstrap --bootstrap-password {{ admin_password }} \
+        --bootstrap-admin-url http://{{ internal_single_host_address|default(groups['controller'][0]) }}:35357/v3/ \
+        --bootstrap-internal-url http://{{ internal_single_host_address|default(groups['controller'][0]) }}:5000/v3/ \
+        --bootstrap-public-url http://{{ internal_single_host_address|default(groups['controller'][0]) }}:5000/v3/ \
+        --bootstrap-region-id RegionOne
+    when: groups['controller'][0] | length == 1
+
+  - name: list projects
+    command: "openstack project list"
+    register: plist
+    when: not ansible_check_mode
+
+  - block:
+    - command: "openstack project create --domain default --description 'Service Project' service"
+    - command: "openstack project create --domain default --description 'Demo Project' demo"
+    - command: "openstack user create --domain default --password {{ demo_password }} demo"
+    - command: "openstack role create user"
+    - command: "openstack role add --project demo --user demo user"
+    when: not ansible_check_mode and plist.stdout.find("service") < 0
+  run_once: true
+
+- name: test keystone token for single controller node
+  tags: test
+  delegate_to: "{{ groups['controller'][0] }}"
+  shell: openstack --os-auth-url http://{{ ansible_eth1['ipv4']['address'] }}:35357/v3 token issue | grep '^| id'
+  when: groups['controller'][0] | length == 1
+
+- name: test keystone token for multi controller nodes
+  tags: test
+  delegate_to: "{{ groups['controller'][0] }}"
+  shell: openstack --os-auth-url http://{{ internal_vip_address }}:35357/v3 token issue | grep '^| id'
+  when: groups['controller'][0] | length > 1

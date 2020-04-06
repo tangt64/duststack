@@ -1,0 +1,4 @@
+#- import_tasks: fix_to_django_module.yaml
+- import_tasks: horizon.yaml
+  when: enable_horizon|bool
+

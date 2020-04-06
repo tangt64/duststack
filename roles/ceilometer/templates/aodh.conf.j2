@@ -1,0 +1,31 @@
+[DEFAULT]
+
+transport_url = rabbit://{% for host in groups['controller'] %}openstack:{{ rabbitmq_password }}@{{ hostvars[host]['ansible_default_ipv4']['address'] }}{% if not loop.last %},{% endif %}{% endfor %}
+
+
+[database]
+connection = mysql+pymysql://aodh:{{ aodhdb_password }}@{{ internal_vip_address|default(groups['controller'][0]) }}/aodh
+
+[keystone_authtoken]
+auth_uri = http://{{ internal_vip_address|default(groups['controller'][0]) }}:5000
+auth_url = http://{{ internal_vip_address|default(groups['controller'][0]) }}:35357
+auth_type = password
+project_domain_name = default
+user_domain_name = default
+project_name = service
+username = aodh
+password = {{ aodh_password }}
+memcached_servers = {% for host in groups['controller'] %}{{ hostvars[host]['ansible_default_ipv4']['address'] }}:11211{% if not loop.last %},{% endif %}{% endfor %}
+
+
+[service_credentials]
+auth_url = http://{{ internal_vip_address|default(groups['controller'][0]) }}:5000/v3
+auth_type = password
+project_domain_name = default
+user_domain_name = default
+project_name = service
+username = aodh
+password = {{ aodh_password }}
+interface = internalURL
+region_name = RegionOne
+memcached_servers = {% for host in groups['controller'] %}{{ hostvars[host]['ansible_default_ipv4']['address'] }}:11211{% if not loop.last %},{% endif %}{% endfor %}

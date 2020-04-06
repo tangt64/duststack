@@ -1,0 +1,2 @@
+- import_tasks: neutron-openvswitch.yaml
+  when: enable_openvswitch|bool

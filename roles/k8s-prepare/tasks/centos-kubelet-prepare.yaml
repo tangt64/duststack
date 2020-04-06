@@ -1,0 +1,13 @@
+- name: check to bootstrap file
+  stat: 
+    path: /etc/kubernetes/bootstrap.kubeconfig
+  register: bootstrap_file
+
+- name: copy the bootstrap file 
+  copy: 
+    src: files/k8s-bootstrap.sh
+    dest: /etc/kubernetes/k8s-bootstrap.sh
+
+#- name: run to bootstrap
+#  command: sh /etc/kubernetes/k8s-bootstrap.sh {{ KUBE_APISERVER }}
+#  when: not bootstrap_file.stat.exists

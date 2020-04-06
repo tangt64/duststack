@@ -1,0 +1,2 @@
+- import_tasks: cinder.yaml
+  when: controller is not defined

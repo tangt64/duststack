@@ -1,0 +1,92 @@
+- block:
+#nova
+  - name: create nano flavor
+    shell: openstack flavor list | awk '/m1.nano/{print "m1.nano"}'
+    register: flav
+
+  - name: create nano flavor
+    command: openstack flavor create --id 0 --vcpus 1 --ram 64 --disk 1 m1.nano
+    when: flav.stdout.find('m1.nano') < 0
+
+  - name: launch test instance
+    tags: test_nova
+    command: openstack server create --image cirros --flavor m1.nano --network private test_vm
+
+  - name: wait for launching the instance
+    pause:
+      minutes: 1
+
+  - name: check instance status
+    tags: test_nova
+    shell: openstack server show test_vm | awk '/status/{print $4}'
+    register: result
+    failed_when: result.stdout.find('ACTIVE') < 0
+
+  - name: destroy instance
+    tags: test_nova
+    command: openstack server delete test_vm
+
+  #heat
+  - name: copy stack template
+    tags: test_stack
+    copy: src=test_stack.yaml dest=/tmp/cirros.yaml
+
+  - name: create test stack
+    command: openstack stack create --wait -t /tmp/cirros.yaml test_stack
+
+  - name: check stack status
+    tags: test_stack
+    shell: openstack stack show test_stack | awk '/status /{print $4}'
+    register: result
+    failed_when: result.stdout.find('CREATE_COMPLETE') < 0
+
+  - name: wait for launching the stack
+    pause:
+      minutes: 1
+
+  - name: delete stack 
+    tags: test_stack
+    command: openstack stack delete --wait -y test_stack
+
+  - name: delete nano flavor
+    command: openstack flavor delete m1.nano
+
+  #swift
+  - name: If swift is enabled go test 
+    block:
+    - name: create test container
+      tags: test_swift
+      command: swift post test_swift
+
+    - name: create test file
+      tags: test_swift
+      command: dd if=/dev/urandom of=test_swift bs=1024 count=2000
+
+    - name: upload test file to test container
+      tags: test_swift
+      command: swift upload test_swift test_swift
+
+    - name: remove test file
+      tags: test_swift
+      file: name=test_swift state=absent
+
+    - name: download the file from test container
+      tags: test_swift
+      command: swift download test_swift test_swift
+
+    - name: remove test file
+      tags: test_swift
+      file: name=test_swift state=absent
+
+    - name: delete test file from test container
+      tags: test_swift
+      command: swift delete test_swift test_swift
+
+    - name: delete test container
+      tags: test_swift
+      command: swift delete test_swift
+    run_once: true
+  when: 
+    - not ansible_check_mode
+    - enable_swift
+    - enable_test
