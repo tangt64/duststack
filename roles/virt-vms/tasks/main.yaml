@@ -1,12 +1,16 @@
 - name: check to installed libvirt daemon
-  yum:
-    name: libvirt-daemon
-    state: installed
+  dnf:
+    name: "{{ packages }}"
   register: install_status
+  vars:
+    packages:
+    - libvirt
+    - libvirt-daemon-kvm
+    - libvirt-client
 
 - name: install libvirt daemon, python-libvirt and httpd packages
   yum:
-    name: ['libvirt-daemon','libvirt-python','httpd']
+    name: ['libvirt-daemon-*','httpd','python2-lxml','python3-lxml']
     state: latest
   when: install_status.rc == 0
 
@@ -16,6 +20,11 @@
     permanent: yes
     immediate: yes
     state: enabled
+    zone: "{{ item }}"
+  with_items:
+    - libvirt
+    - public
+
 
 - name: start libvirt daemon
   service:

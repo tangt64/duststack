@@ -8,13 +8,13 @@
     - NetworkManager
 
 #- name: enable to EPEL repository
-#  yum: 
+#  dnf: 
 #    name: epel-release 
 #    state: latest 
 #    update_cache: yes
 
 - name: install packages for kubernetes service
-  yum: 
+  dnf: 
     name: 
       - bash-completion
       - kubernetes-master
@@ -26,7 +26,7 @@
     update_cache: yes
 
 - name: install openssl package for kubernetes service
-  yum: 
+  dnf: 
     name: 
       - openssl
     state: latest

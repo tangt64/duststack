@@ -68,7 +68,7 @@
 
 - block:
     - name: install k8s-etcd package
-      yum:
+      dnf:
         name: etcd
         state: latest
     

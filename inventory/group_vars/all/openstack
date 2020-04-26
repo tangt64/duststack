@@ -1,3 +1,5 @@
+ansible_python_interpreter: auto_legacy_silent
+
 enable_heat: true
 enable_swift: false
 enable_horizon: true
@@ -39,7 +41,6 @@ swift_hash_path_suffix: 39fe2de19b
 swift_hash_path_prefix: 7a2cac670f
 
 swift_storage_dir: /srv/node
-swift_storage_devices:
 swift_storage_devices:
   - /srv/swiftfs1.data
 

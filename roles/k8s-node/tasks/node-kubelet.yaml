@@ -1,5 +1,5 @@
 - name: install node
-  yum:
+  dnf:
     name: ['containernetworking-plugins', 'kubernetes-node']
     state: latest
 
