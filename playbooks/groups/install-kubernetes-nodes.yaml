@@ -1,6 +1,0 @@
-- name: install kubernetes minion nodes
-  hosts: k8s_node
-  tags: k8s-node
-  roles:
-    - k8s-node
-
