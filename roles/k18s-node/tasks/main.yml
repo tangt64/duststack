@@ -1,0 +1,29 @@
+---
+# tasks file for k18s-node
+- name: get token 
+  command: kubeadm token create --print-join-command
+  delegate_to: "{{ groups['k18s-master'] | first }}"
+  register: k18stoken
+
+- name: copy kubelet config file to /etc/sysconfig
+  copy:
+    src: kubelet
+    dest: /etc/sysconfig/kubelet
+ 
+- name: kernel module up for nftables
+  command: modprobe "{{ item }}"
+  with_items:
+    - ip_vs_rr
+    - ip_vs_wrr
+    - ip_vs_sh
+    - ip_vs
+    - nf_conntrack_ipv4
+
+- name:
+  service:
+    name: kubelet
+    state: restarted
+    permanent: yes
+
+- name: join to the kubernetes cluster
+  command: "{{ k18stoken.stdout }}"

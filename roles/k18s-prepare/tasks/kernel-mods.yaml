@@ -1,0 +1,17 @@
+---
+- name: uploading to overlay, br_netfilter modules
+  command: modprobe "{{ item }}"
+  with_items:
+    - overlay
+    - br_netfilter
+
+- name: permanently module loaded when boot up
+  copy: 
+    src: k8s-modules.conf
+    dest: /etc/modprobe.d/k8s-modules.conf
+
+- name: enable iptables bridge and forward
+  copy:
+    src: 99-kubernetes.conf
+    dest: /etc/sysctl.d/99-kubernetes.conf
+

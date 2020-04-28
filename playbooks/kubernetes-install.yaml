@@ -1,0 +1,13 @@
+- name: install kubernetes master
+  hosts: k18s-master
+  tags: k18s-master
+  vars:
+    token: "{{ k8stoken }}"
+  roles:  
+    - k18s-master
+
+- name: install kubernetes node
+  hosts: k18s-node
+  tags: k18s-node
+  roles:  
+    - k18s-node
