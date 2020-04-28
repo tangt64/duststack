@@ -1,11 +1,7 @@
-- name: prepare 
-  hosts: k8s_etcd
-  tags: k8s-prepare
+- name: install and enable to cri-o,docker enviroment
+  hosts: k18s-master:k18s-node
+  tags: k18s-prepare
   roles:  
-    - { role: k8s-prepare }
-
-- name: install etcd
-  hosts: k8s_etcd
-  tags: k8s-etcd
-  roles:  
-    - { role: etcd, k8s-prepare: true }
+    - { role: crio, when: crio_enviroment == true }
+    - { role: docker, when: crio_enviroment == false }
+    - { role: k18s-prepare }
