@@ -1,6 +1,4 @@
 ---
-- import_playbook: groups/install-docker.yaml
 - import_playbook: groups/prepare-kubernetes.yaml
-- import_playbook: groups/install-kubernetes-etcd.yaml
-- import_playbook: groups/install-kubernetes-masters.yaml
-- import_playbook: groups/install-kubernetes-nodes.yaml
+- import_playbook: groups/prepare-crio.yaml
+- import_playbook: groups/install-kubernetes.yaml

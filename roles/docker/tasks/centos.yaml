@@ -1,18 +1,9 @@
-- name: install dnf package manager
-  dnf:
-    name: "{{ item }}"
-    state: latest
-  with_items:
-    - python2-dnf
-    - dnf
-  
 - name: verify installed docker package
-  shell: "`which dnf` list installed | grep docker | awk '{ print $1 }' | cut -d '-' -f1"
+  shell: "`which yum` list installed | grep docker | awk '{ print $1 }' | cut -d '-' -f1"
   register: is_docker
 
-
 - name: install docker on a node
-  dnf:
+  yum:
     name: docker
     state: present
   when: (is_docker.stdout != 'docker')
