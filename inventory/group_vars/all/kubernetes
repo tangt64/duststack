@@ -1,4 +1,8 @@
 subnetnetwork: 10.244.0.0/16
-crio_enviroment: false
-flanned: false
-calico: true
+
+#runtime enviroment docker, crio
+runtime_enviroment: docker
+
+# support calico, flanned
+k8s_network: calico
+
