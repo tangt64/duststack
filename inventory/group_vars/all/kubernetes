@@ -1,8 +1,4 @@
-subnetnetwork: 10.88.0.0/16
+subnetnetwork: 10.244.0.0/16
 crio_enviroment: false
-apiserver_address: 192.168.122.71
-k8s-flanned: true
-k8s-calico: false
-flanned: true
-calico: false
-
+flanned: false
+calico: true
