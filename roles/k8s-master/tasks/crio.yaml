@@ -1,0 +1,4 @@
+---
+- name: init kubeadmin with crio
+  shell: kubeadm init --pod-network-cidr="{{ subnetwork }}" --apiserver-advertise-address="{{ apiserver_address }}" --cri-socket /var/run/crio/crio.sock
+  register: kube_discovery

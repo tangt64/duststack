@@ -1,0 +1,50 @@
+---
+# tasks file for k18s-node
+- name: get token 
+  command: kubeadm token create --print-join-command
+  delegate_to: "{{ groups['k8s_master'] | first }}"
+  register: k18stoken
+
+- name: copy kubelet config file to /etc/sysconfig
+  copy:
+    src: kubelet
+    dest: /etc/sysconfig/kubelet
+ 
+- name: kernel module up for nftables
+  command: modprobe "{{ item }}"
+  with_items:
+    - ip_vs_rr
+    - ip_vs_wrr
+    - ip_vs_sh
+    - ip_vs
+    - nf_conntrack_ipv4
+
+- name: restart to kubelet.service
+  service:
+    name: kubelet
+    state: restarted
+
+    #- name: join to the kubernetes cluster
+    #  command: "{{ k18stoken.stdout }}"
+
+- name: join to the cluster 
+  block:
+    - name: apply sysctl
+      command: sysctl --system -q
+
+    - name: join to the kubernetes cluster
+      command: "{{ k18stoken.stdout }}"
+      register: node_result
+      no_log: yes
+    - debug:
+        msg: The nodes successfully cluster joined
+    - pause:
+        minutes: 1
+  rescue:
+    - name: reset node
+      command: kubeadm reset --force
+      no_log: yes
+    - debug:
+        msg: The nodes has been reseted
+      failed_when: ( master_result.rc in [ 1,2 ] )
+
