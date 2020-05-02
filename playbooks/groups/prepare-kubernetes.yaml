@@ -2,6 +2,6 @@
   hosts: k8s_master:k8s_node
   tags: k8s-prepare
   roles:  
-    - { role: crio, when: crio_enviroment == true }
-    - { role: docker, when: crio_enviroment == false }
+    - { role: crio, when: runtime_enviroment == "crio" }
+    - { role: docker-ce, when: runtime_enviroment == "docker" }
     - { role: k8s-prepare }
