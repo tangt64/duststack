@@ -1,7 +1,7 @@
 - name: install and enable to cri-o,docker enviroment
-  hosts: k18s-master:k18s-node
-  tags: k18s-prepare
+  hosts: k8s_master:k8s_node
+  tags: k8s-prepare
   roles:  
     - { role: crio, when: crio_enviroment == true }
     - { role: docker, when: crio_enviroment == false }
-    - { role: k18s-prepare }
+    - { role: k8s-prepare }

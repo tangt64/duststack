@@ -1,5 +1,6 @@
 - name: install kubernetes master on the node
-  hosts: k18s-master
-  tags: k18s-master
+  hosts: k8s-master
+  tags: k8s-master
   roles:  
-    - k18s-master
+    - k8s-master
+    - nginx-ingress
