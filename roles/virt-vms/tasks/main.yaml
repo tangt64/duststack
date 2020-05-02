@@ -1,5 +1,5 @@
 - name: check to installed libvirt daemon
-  dnf:
+  yum:
     name: "{{ packages }}"
   register: install_status
   vars:
