@@ -1,2 +1,0 @@
-- include_tasks: master-service.yaml
-- include_tasks: master.yaml
