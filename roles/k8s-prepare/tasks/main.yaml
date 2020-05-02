@@ -1,3 +1,0 @@
-- include_tasks: centos-disable-service.yaml
-- include_tasks: centos-config-system.yaml  
-- include_tasks: centos-kubelet-prepare.yaml
