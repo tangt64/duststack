@@ -28,7 +28,7 @@
       register: master_result
       no_log: yes
     - debug:
-        success_msg: The master nodes successfully installed
+        msg: The master nodes successfully installed
     - pause:
         minutes: 1
   rescue:
