@@ -25,7 +25,6 @@
     - libvirt
     - public
 
-
 - name: start libvirt daemon
   service:
     name: libvirtd
