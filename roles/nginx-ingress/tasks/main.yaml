@@ -1,31 +1,38 @@
+- name: copy the nginx-ingress materials to /tmp/
+  copy:
+    src: "{{ deployment_directory }}"
+    dest: /tmp/"{{ deployment_directory }}"
+
 - name: nginx-ingress namespace and service account
-  command: apply -f {{ deployment_directory }}/common/ns-and-sa.yaml
+  command: apply -f /tmp/common/ns-and-sa.yaml
 
 - name: nginx-ingress RBAC
-  command: apply -f {{ deployment_directory }}/common/rbac.yaml
+  command: apply -f /tmp/common/rbac.yaml
 
 - name: secret with TLS certificate and key for NGINX
-  command: apply -f {{ deployment_directory }}/common/default-server-secret.yaml
+  command: apply -f /tmp/common/default-server-secret.yaml
 
 - name: Create a config map for customizing NGINX configuration
-  command: apply -f {{ deployment_directory }}/common/nginx-config.yaml
+  command: apply -f /tmp/common/nginx-config.yaml
 
 - name: Create custom resource definitions for VirtualServer and VirtualServerRoute and TransportServer resources
-  command: kubectl apply -f {{ deployment_directory }}/common/vs-definition.yaml
-  command: kubectl apply -f {{ deployment_directory }}/common/vsr-definition.yaml
-  command: kubectl apply -f {{ deployment_directory }}/common/ts-definition.yaml
+  command: kubectl apply -f {{ item }}
+  with_items:
+    - /tmp/common/vs-definition.yaml
+    - /tmp/common/vsr-definition.yaml
+    - /tmp/common/ts-definition.yaml
 
 - name: Create a custom resource definition for GlobalConfiguration resource
-  command: kubectl apply -f {{ deployment_directory }}/common/gc-definition.yaml
+  command: kubectl apply -f /tmp/common/gc-definition.yaml
 
 - name: Create a GlobalConfiguration resource
-  command: kubectl apply -f {{ deployment_directory }}/common/global-configuration.yaml
+  command: kubectl apply -f /tmp/common/global-configuration.yaml
 
 - name: deploy NGINX Controller
-  command: kubectl apply -f {{ deployment_directory }}/deployment/nginx-ingress.yaml
+  command: kubectl apply -f /tmp/deployment/nginx-ingress.yaml
 
 - name: deploy NGINX DaemonSet
-  command: kubectl apply -f {{ deployment_directory }}/daemon-set/nginx-ingress.yaml
+  command: kubectl apply -f /tmp/daemon-set/nginx-ingress.yaml
 
 - name: Create a service for the ingress controller pods
-  command: kubectl apply -f {{ deployment_directory }}/service/nodeport.yaml
+  command: kubectl apply -f /tmp/service/nodeport.yaml
