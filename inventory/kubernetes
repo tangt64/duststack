@@ -1,7 +1,8 @@
 # kubernetes inventory file
 
 [k8s_master]
-192.168.122.71 hostname=master-1 nodename=master-1
+192.168.122.110 hostname=master-1 nodename=master-1
 
 [k8s_node]
-192.168.122.29 hostname=node-1 nodename=node-1
+192.168.122.130 hostname=node-1 nodename=node-1
+192.168.122.140 hostname=node-2 nodename=node-2
