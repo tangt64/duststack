@@ -4,7 +4,9 @@
   serial: 1
   tags: classroom
   roles:  
-    - virt-vms
+    - { role: virt-vms, when: lab == "openstack" }
+    - { role: virt-k8s, when: lab == "kubernetes" }
+
 
 #- name: SSH user key generator 
 #  hosts: all
