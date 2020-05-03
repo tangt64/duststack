@@ -68,25 +68,13 @@
     - "{{ compute_nodes }}"
     - "{{ storage_nodes }}"
 
-- name: create a control VMs virtual disk
+- name: create a OpenStack VMs for LAB virtual disk
   command: qemu-img create -f {{ virt_disk_format }} {{ virt_disk_image_path }}{{ item }}.{{ virt_disk_format }} {{ virt_disk_size }}
   with_items:
     - "{{ control_nodes }}"
-
-- name: create a compute VMs virtual disk
-  command: qemu-img create -f {{ virt_disk_format }} {{ virt_disk_image_path }}{{ item }}.{{ virt_disk_format }} {{ virt_disk_size }}
-  with_items:
     - "{{ compute_nodes }}"
-
-- name: create a storage VMs virtual disk
-  command: qemu-img create -f {{ virt_disk_format }} {{ virt_disk_image_path }}{{ item }}.{{ virt_disk_format }} {{ virt_disk_size }}
-  with_items:
     - "{{ storage_nodes }}"
-
-- name: create a network VMs virtual disk
-  command: qemu-img create -f {{ virt_disk_format }} {{ virt_disk_image_path }}{{ item }}.{{ virt_disk_format }} {{ virt_disk_size }}
-  with_items:
-    - "{{ network_nodes }}"
+    - "{{ network_nodes }}"   
 
 - name: check to internal network device
   shell: "virsh net-list | grep internal | awk '{ print $1 }'"
@@ -167,7 +155,7 @@
   pause:
     seconds: 30
 
-- name: stop to compute VMs
+- name: stop to compute VMs for attach to vdb disk
   virt:
     name: "{{ item }}"
     command: destroy 
