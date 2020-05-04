@@ -64,7 +64,7 @@
 # ansiple-playbook -i inventory/kubernetes playbooks/kubernetes.yaml
 ```
 
-**"group_vars"**의 파일을 꼭 수정하셔야 됩니다. 조만간 수정 방법은 정리해서 올리도록 하겠습니다.
+**group_vars**의 파일을 꼭 수정하셔야 됩니다. 조만간 수정 방법은 정리해서 올리도록 하겠습니다.
 물리적 컴퓨터에 설치하는 경우 **inventory/openstack**, **inventory/kubernetes** 파일 수정이 필요 합니다.
 
 ## 문의사항
