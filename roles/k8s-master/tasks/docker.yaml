@@ -22,7 +22,6 @@
   block:
     - name: apply sysctl
       command: sysctl --system -q
-
     - name: install master
       command: kubeadm init --pod-network-cidr={{ subnetnetwork }} --apiserver-advertise-address={{ groups['k8s_master']|first }}
       register: master_result
