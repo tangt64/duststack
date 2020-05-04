@@ -3,6 +3,7 @@
 ## 알려드려요!
 
 - **placement**에 사소한 버그가 있습니다. 플레이북 문제가 아니라 placement가 이전 정보를 테이블에 저장하고 있습니다.
+- 아직 정식버전이 아닙니다. 지속적으로 갱신이 되고 있습니다.
 
 앤서블 기반으로 **오픈스택/컨테이너/스토리지 클러스터를 구축**하는 플레이북 입니다. 아직 **공식버전**이 아닙니다. 
 아직도 계속 **개발/테스트/분리**가 진행이 되고 있습니다. 
@@ -45,16 +46,27 @@
 
 ## 설치방법 
 
+### 랩 구성 방법
+```bash
+# ansible-playbook -i inventory/classroom -e lab=openstack playbooks/classroom.yaml
+# ansible-playbook -i inventory/classroom -e lab=kubernetes playbooks/classroom.yaml
+# library/sshkeygensend.sh
+```
+필요한 경우 sshkeygensend.sh 수정해서 공개/비공개키 이름 변경
+
+
+### kubernetes, openstack 설치
 ```bash
 # yum install ansible git -y
 # yum group install "Virtualization Host" -y
 # git clone http://git.howtodothat.kr/tang/duststack
 # ansible-playbook -i inventory/openstack playbooks/openstack.yaml
+# ansiple-playbook -i inventory/kubernetes playbooks/kubernetes.yaml
 ```
 
 - **"group_vars"**의 파일을 꼭 수정하셔야 됩니다. 조만간 수정 방법은 정리해서 올리도록 하겠습니다.
 
-- 설치전에 꼭 **inventory/openstack**파일에서 서버의 아이피 주소를 꼭 변경해야 합니다.
+- 물리적 컴퓨터에 설치하는 경우 **inventory/openstack**, **inventory/kubernetes** 파일 수정이 필요 합니다.
 
 ## 문의사항
 
@@ -65,5 +77,5 @@
 
 
 ## License
-MIT 라이센스 입니다. 플레이북은 마음대로 사용하셔도 됩니다. 
+MIT 라이센스
 [MIT](LICENSE)
