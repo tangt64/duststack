@@ -1,0 +1,3 @@
+---
+- import_playbook: groups/prepare-openstack.yaml
+- import_playbook: groups/install-openstack.yaml
