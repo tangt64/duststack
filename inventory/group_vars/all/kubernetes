@@ -1,5 +1,4 @@
 subnetnetwork: 10.244.0.0/16
-deployment_directory: kubernetes-ingress/deployments
 
 #runtime enviroment docker, crio
 runtime_enviroment: docker
