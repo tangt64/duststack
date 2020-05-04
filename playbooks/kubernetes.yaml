@@ -1,3 +1,4 @@
 ---
-- import_playbook: groups/prepare-kubernetes.yaml
-- import_playbook: groups/install-kubernetes.yaml
+- import_playbook: kubernetes-prepare.yaml
+- import_playbook: kubernetes-install.yaml
+

@@ -4,3 +4,9 @@
   roles:  
     - k8s-master
     - nginx-ingress
+
+- name: install kubernetes node
+  hosts: k8s_node
+  tags: k8s-node
+  roles:  
+    - k8s-node

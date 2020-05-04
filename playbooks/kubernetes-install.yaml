@@ -1,13 +1,1 @@
-- name: install kubernetes master
-  hosts: k8s_master
-  tags: k8s-master
-  vars:
-    token: "{{ k8stoken }}"
-  roles:  
-    - k8s-master
-
-- name: install kubernetes node
-  hosts: k8s_node
-  tags: k8s-node
-  roles:  
-    - k8s-node
+- import_playbook: groups/install-kubernetes.yaml
