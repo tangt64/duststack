@@ -16,11 +16,8 @@
       path: /var/lib/rabbitmq/
       state: directory
       owner: rabbitmq
-      group: rabbitmq
-
-  # - shell: rm -rf /var/lib/rabbitmq/{*,.er*}
-    #shell: service rabbitmq-server stop; rm -rf /var/lib/rabbitmq/{*,.er*}
-  when: destroy_data|bool
+      group: rabbitmq 
+  
 
 - name: copy rabbitmq config
   tags: config
