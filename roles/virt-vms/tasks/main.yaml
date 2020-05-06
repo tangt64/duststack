@@ -51,11 +51,7 @@
     group: root
     mode: 0644
   with_items:
-    - "{{ control_nodes }}"
-    - "{{ network_nodes }}"
-    - "{{ compute_nodes }}"
-    - "{{ storage_nodes }}"
-
+    - "{{ openstack_nodes }}"
 - name: adjust to kickstart .ks file permission 
   file:
     path: "{{ local_apache_htdoc_directory }}{{ item }}.ks"
@@ -63,18 +59,12 @@
     group: root
     mode: 0644
   with_items:
-    - "{{ control_nodes }}"
-    - "{{ network_nodes }}"
-    - "{{ compute_nodes }}"
-    - "{{ storage_nodes }}"
+    - "{{ openstack_nodes }}"
 
 - name: create a OpenStack VMs for LAB virtual disk
   command: qemu-img create -f {{ virt_disk_format }} {{ virt_disk_image_path }}{{ item }}.{{ virt_disk_format }} {{ virt_disk_size }}
   with_items:
-    - "{{ control_nodes }}"
-    - "{{ compute_nodes }}"
-    - "{{ storage_nodes }}"
-    - "{{ network_nodes }}"   
+    - "{{ openstack_nodes }}"  
 
 - name: check to internal network device
   shell: "virsh net-list | grep internal | awk '{ print $1 }'"
@@ -94,16 +84,7 @@
 - name: create vdb disk for compute
   command: qemu-img create -f {{ virt_disk_format }} {{ virt_disk_image_path }}{{ item }}-{{ virt_vdb_postfix }}.{{ virt_disk_format }} {{ virt_disk_size }}
   with_items:
-    - "{{ compute_nodes }}"
-
-- name: create secondary disk XML file and defined to the VMs.
-  template:
-    src: 'vdb.xml.j2'
-    dest: "{{ virt_disk_image_path }}{{ virt_vdb_postfix }}.xml"
-    owner: "{{ libvirt_owner }}"
-    group: "{{ libvirt_group }}"
-    mode: 0644
-  when: enable_vdb_disk is defined
+    - "{{ vdb_nodes }}"
 
 - name: starting to internal virtual network
   virt_net:
@@ -119,48 +100,56 @@
     group: qemu
     mode: 0644
   with_items:
-    - "{{ control_nodes }}"
-    - "{{ network_nodes }}"
-    - "{{ compute_nodes }}"
-    - "{{ storage_nodes }}"
+    - "{{ openstack_nodes }}"
 
-- name: install virtual machine on libvirt daemon 
+- name: install control/network/storage virtual machine on libvirt daemon 
   shell: virt-install -n {{ item }} -r {{ vmem }} --cpu host-passthrough --vcpus {{ vcpu }} -l {{ repository_url }} --network network={{ nic1 }} --network network={{ nic2 }} --graphics {{ virt_graphics }} -v --disk=path={{ virt_disk_image_path }}{{ item }}.{{ virt_disk_format }},format={{ virt_disk_format }} --noautoconsole -x ks="{{ kickstart_address }}/{{ item }}.ks"
   with_items:
-    - "{{ control_nodes }}"
-    - "{{ network_nodes }}"
-    - "{{ storage_nodes }}"
+    - "{{ openstack_nodes }}"
 
-- name: install compute virtual machine on libvirt daemon 
-  shell: virt-install -n {{ item }} -r {{ vmem_compute }} --cpu host-passthrough --vcpus {{ vcpu }} -l {{ repository_url }} --network network={{ nic1 }} --network network={{ nic2 }} --graphics {{ virt_graphics }} -v --disk=path={{ virt_disk_image_path }}{{ item }}.{{ virt_disk_format }},format={{ virt_disk_format }} --noautoconsole -x ks="{{ kickstart_address }}/{{ item }}.ks"
-  with_items:
-    - "{{ compute_nodes }}"
-
-- name: wait for build of VMs
+- name: wait for build to VMs
   pause:
     minutes: 10
     prompt: "Waiting for building to VMs about 10 mins"
 
-- name: starting to control/compute/storage VMs
-  virt:
-    name: "{{ item }}"
-    command: start 
-  with_items:
-    - "{{ control_nodes }}"
-    - "{{ network_nodes }}"
-    - "{{ storage_nodes }}"
-    - "{{ compute_nodes }}"
+- block:
+    - name: starting to control/compute/storage VMs
+      virt:
+        name: "{{ item }}"
+        command: start 
+      with_items:
+        - "{{ openstack_nodes }}"
+      no_log: true
+
+  rescue:
+    - name: some VMs has been failed
+      pause:
+        minutes: 5
+        prompt: "Waiting more 5 mins"
+
+    - name: again start to VMs
+      virt:
+        name: "{{ item }}"
+        command: start 
+      with_items:
+        - "{{ openstack_nodes }}"
+      ignore_errors: yes
 
 - name: wait for boot up all of VMs in 30 second
   pause:
     seconds: 30
+
+- name: attach a disk to compute node as vdb
+  command: virsh attach-disk {{ item }} --source {{ virt_disk_image_path }}{{ item }}-{{ virt_vdb_postfix }}.{{ virt_disk_format }} --target {{ virt_vdb_postfix }} --subdriver qcow2 --targetbus virtio --cache none --persistent
+  with_items:
+    - "{{ vdb_nodes }}"
 
 - name: stop to compute VMs for attach to vdb disk
   virt:
     name: "{{ item }}"
     command: destroy 
   with_items:
-    - "{{ compute_nodes }}"
+    - "{{ vdb_nodes }}"
 
 - name: wait for boot up all of VMs in 30 second
   pause:
@@ -171,7 +160,7 @@
     name: "{{ item }}"
     command: start 
   with_items:
-    - "{{ compute_nodes }}"
+    - "{{ vdb_nodes }}"
 
 - name: wait for boot up all of VMs in 30 second
   pause:
