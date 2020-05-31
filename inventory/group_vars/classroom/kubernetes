@@ -6,6 +6,8 @@ k8s_nodes_1:
   - k8s-node-1
 k8s_nodes_2:
   - k8s-node-2
+k8s_nodes_3:
+  - k8s-node-3
 
 virt_disk_format: qcow2
 virt_disk_image_path: /var/lib/libvirt/images/

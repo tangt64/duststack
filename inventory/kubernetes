@@ -6,3 +6,7 @@
 [k8s_node]
 192.168.122.130 hostname=node-1 nodename=node-1
 192.168.122.140 hostname=node-2 nodename=node-2
+192.168.122.150 hostname=node-3 nodename=node-3
+
+[k8s_utility]
+192.168.122.120 hostname=utility nodename=utility

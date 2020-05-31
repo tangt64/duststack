@@ -109,8 +109,8 @@
 
 - name: wait for build to VMs
   pause:
-    minutes: 10
-    prompt: "Waiting for building to VMs about 10 mins"
+    minutes: 30
+    prompt: "Waiting for building to VMs about 30 mins"
 
 - block:
     - name: starting to control/compute/storage VMs

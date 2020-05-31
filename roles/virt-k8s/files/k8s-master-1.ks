@@ -5,7 +5,7 @@ install
 # Keyboard layouts
 keyboard 'us'
 # Root password
-rootpw --iscrypted $1$vZhANTdH$a5juvIOCLLNWs2Xc2UU3v1
+rootpw --iscrypted $6$AvdjZxuqmPqE0Kqe$ATNI9NVyRF/o4b9OfNGFjxB8zRBqE46G0khMOxxemf/7Cz./7jM5EccXf1fJ9H0UsNwdKQoQL1skkqIMjnTlu1
 # Use network installation
 url --url="http://mirror.kakao.com/centos/7/os/x86_64/"
 # System language
@@ -46,6 +46,7 @@ cat <<EOF>> /etc/hosts
 192.168.90.120 utility.example.com utility
 192.168.90.130 node-1.example.com node1
 192.168.90.140 node-2.example.com node2
+192.168.90.150 node-3.example.com node3
 EOF
 systemctl enable firewalld
 %end
