@@ -48,5 +48,13 @@ cat <<EOF>> /etc/hosts
 192.168.90.140 node-2.example.com node2
 192.168.90.150 node-3.example.com node2
 EOF
+
+cat <<EOF> /root/.vimrc
+au! BufNewFile,BufReadPost *.{yaml,yml} set filetype=yaml foldmethod=indent
+autocmd FileType yaml setlocal ts=2 sts=2 sw=2 expandtab
+EOF
+
+yum install vim nfs-utils -y
+
 systemctl enable firewalld
 %end
