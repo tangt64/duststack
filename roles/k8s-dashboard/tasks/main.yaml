@@ -1,0 +1,13 @@
+- name: copy dashboard materials on master 
+  copy:
+    src: "{{ item }}"
+    dest: /tmp/
+  with_items:
+    - dashboard.yaml
+    - dashboard-rbac.yaml
+
+- name: create kubernetes dashboard rbac
+  command: kubectl apply -f /tmp/dashboard-rbac.yaml
+
+- name: enable kubernetes dashboard
+  command: kubectl apply -f /tmp/dashboard.yaml
