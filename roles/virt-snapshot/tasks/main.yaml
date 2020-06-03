@@ -8,11 +8,11 @@
     msg: "{{ running_vms }}"
 
 - name: make a snapshot each of VMs
-  shell: "virsh snapshot-create-as {{ item }} --name initial-setup"
+  shell: "virsh snapshot-create-as {{ item }} --name {{ snapname }}"
   with_items: "{{ running_vms.list_vms }}"
   when: status == "snapshot"
 
 - name: restore a snapshot each of VMs
-  shell: "virsh snapshot-revert --current {{ item }}"
+  shell: "virsh snapshot-revert {{ item }} {{ snapname }}"
   with_items: "{{ running_vms.list_vms }}"
   when: status == "restore"
