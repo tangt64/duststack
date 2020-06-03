@@ -17,9 +17,6 @@
 
 - name: create service account tiller
   command: kubectl create -f /tmp/rbac-config.yaml
-  #k8s:
-  #  state: present
-  #  src: /tmp/rbac-config.yaml
 
 - name: edit clusterrolebind permissive-binding
   command: kubectl create clusterrolebinding permissive-binding --clusterrole=cluster-admin --user=admin --user=kubelet --group=system:serviceaccounts
@@ -43,34 +40,26 @@
     - "helm install --namespace rook-ceph rook-release/rook-ceph"
   ignore_errors: yes
 
-- name: deploy the Rook operator
-  command: kubectl create -f /tmp/"{{ item }}"
-  #k8s:
-  #  state: present
-  #  src: /tmp/'{{ item }}'
-  with_items:
-    - ceph-common.yaml
-    - ceph-operator.yaml
-    - ceph-cluster.yaml
-  ignore_errors: yes
+# - name: deploy the Rook operator
+#   command: kubectl create -f /tmp/"{{ item }}"
+#   with_items:
+#     - ceph-common.yaml
+#     - ceph-operator.yaml
+#     - ceph-cluster.yaml
+#   ignore_errors: yes
 
 - name: verify the rook-ceph-operator is 'Running'
   command: kubectl get pods -n rook-ceph
 
 - name: deploy Rook toolbox 
   command: kubectl create -f /tmp/rook-toolbox.yaml
-  #k8s:
-  #  state: present
-  #  src: /tmp/rook-toolbox.yaml
-
+  
 - name: create a storage class based on the ceph RBD volume plugin
   command: kubectl create -f /tmp/rook-storageclass.yaml
-  #k8s:
-  #  state: present
-  #  src: /tmp/rook-storageclass.yaml
+  
 
 - name: create a shared file system which can be mounted read-write from multi pods
   command: kubectl create -f /tmp/rook-filesystem.yaml
-  #k8s:
-  #  state: present
-  #  src: /tmp/rook-filesystem.yaml
+
+- name: deploy kubernetes metrics service
+  command: helm install --name metrics-server stable/metrics-server  --namespace metrics --set args={"--kubelet-insecure-tls=true,--kubelet-preferred-address-types=InternalIP\,Hostname\,ExternalIP"}
