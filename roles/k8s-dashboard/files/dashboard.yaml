@@ -43,7 +43,7 @@ spec:
   selector:
     k8s-app: kubernetes-dashboard
   type: NodePort
-    
+
 ---
 
 apiVersion: v1
