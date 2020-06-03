@@ -6,8 +6,8 @@
     - dashboard.yaml
     - dashboard-rbac.yaml
 
-- name: create kubernetes dashboard rbac
-  command: kubectl apply -f /tmp/dashboard-rbac.yaml
-
 - name: enable kubernetes dashboard
   command: kubectl apply -f /tmp/dashboard.yaml
+
+- name: create kubernetes dashboard rbac
+  command: kubectl apply -f /tmp/dashboard-rbac.yaml
