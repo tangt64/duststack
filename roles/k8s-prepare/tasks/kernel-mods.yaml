@@ -8,7 +8,7 @@
 - name: permanently module loaded when boot up
   copy: 
     src: k8s-modules.conf
-    dest: /etc/modprobe.d/k8s-modules.conf
+    dest: /etc/modules-load.d/k8s-modules.conf
 
 - name: enable iptables bridge and forward
   copy:

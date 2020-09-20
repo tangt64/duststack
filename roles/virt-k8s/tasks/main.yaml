@@ -56,7 +56,6 @@
     - "{{ k8s_utility_node }}"
     - "{{ k8s_nodes_1 }}"
     - "{{ k8s_nodes_2 }}"
-    - "{{ k8s_nodes_3 }}"
 
 - name: adjust to kickstart .ks file permission 
   file:
@@ -69,7 +68,6 @@
     - "{{ k8s_utility_node }}"
     - "{{ k8s_nodes_1 }}"
     - "{{ k8s_nodes_2 }}"
-    - "{{ k8s_nodes_3 }}"
 
 - name: create a master node VM virtual disk
   command: qemu-img create -f {{ virt_disk_format }} {{ virt_disk_image_path }}{{ item }}.{{ virt_disk_format }} {{ virt_disk_size }}
@@ -78,7 +76,6 @@
     - "{{ k8s_utility_node }}"
     - "{{ k8s_nodes_1 }}"
     - "{{ k8s_nodes_2 }}"  
-    - "{{ k8s_nodes_3 }}"
 
 - name: check to internal network device
   shell: "virsh net-list | grep internal | awk '{ print $1 }'"
@@ -113,7 +110,6 @@
     - "{{ k8s_utility_node }}"
     - "{{ k8s_nodes_1 }}"
     - "{{ k8s_nodes_2 }}"
-    - "{{ k8s_nodes_3 }}"
 
 - name: install virtual machine on libvirt daemon 
   shell: virt-install -n {{ item }} -r {{ vmem }} --cpu host-passthrough --vcpus {{ vcpu }} -l {{ repository_url }} --network network={{ nic1 }} --network network={{ nic2 }} --graphics {{ virt_graphics }} -v --disk=path={{ virt_disk_image_path }}{{ item }}.{{ virt_disk_format }},format={{ virt_disk_format }} --noautoconsole -x ks="{{ kickstart_address }}/{{ item }}.ks"
@@ -122,7 +118,6 @@
     - "{{ k8s_utility_node }}"
     - "{{ k8s_nodes_1 }}"
     - "{{ k8s_nodes_2 }}"
-    - "{{ k8s_nodes_3 }}"
 
 - name: wait for build of VMs
   pause:
@@ -138,4 +133,3 @@
     - "{{ k8s_utility_node }}"
     - "{{ k8s_nodes_1 }}"
     - "{{ k8s_nodes_2 }}"
-    - "{{ k8s_nodes_3 }}"

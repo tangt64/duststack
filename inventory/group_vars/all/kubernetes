@@ -1,7 +1,8 @@
 subnetnetwork: 10.244.0.0/16
+vip_enabled: false
 
 #runtime enviroment docker, crio
-runtime_enviroment: docker
+runtime_enviroment: crio
 
 # support calico, flanned
 k8s_network: calico

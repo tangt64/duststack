@@ -1,0 +1,10 @@
+- name: install haproxy service
+  yum:
+    name: haproxy
+    state: latest
+
+- name: enable haproxy service
+  systemd:
+    name: haproxy
+    state: started
+    enabled: yes
