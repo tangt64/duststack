@@ -4,7 +4,7 @@ case "$1" in
     password=openstack
     ;;
   kubernetes)
-    server=$(awk '{ print $1 }' /etc/hosts | grep ^192.168.122)
+    server=$(awk '{ print $1 }' /etc/hosts | grep ^192.168.90)
     password=kubernetes
     ;;
   *)
