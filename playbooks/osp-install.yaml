@@ -1,8 +1,19 @@
+- name: prepare 
+  hosts: all
+  tags: prepare 
+  roles:  
+    - prepare 
+
+- name: prepare
+  hosts: all
+  tags: prepare
+  roles:
+    - prepare [tang@ws groups]$ cat install-openstack.yaml
 - name: ha
   hosts: controller
   tags: ha
-  roles: 
-    - role: ha 
+  roles:
+    - role: ha
       when: (groups['controller']|count > 1)
 
 - name: install rabbitmq
@@ -17,7 +28,7 @@
   roles:
     - database
 
-- name: install mongodb 
+- name: install mongodb
   hosts: database
   tags: mongodb
   roles:
@@ -123,7 +134,7 @@
   roles:
     - { role: swift, controller: true }
   environment: "{{ openstack_env }}"
-  
+
 
 - name: install swift object storage
   hosts: storage_swift
@@ -152,4 +163,3 @@
   roles:
     - { role: tests }
   environment: "{{ openstack_env }}"
-

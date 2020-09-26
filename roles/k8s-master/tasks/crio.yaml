@@ -1,4 +1,4 @@
-- name: init kubeadmin with docker
+- name: init kubeadmin with crio
   block:
     - name: apply sysctl
       command: sysctl --system -q
@@ -9,7 +9,7 @@
     - debug:
         msg: The master nodes successfully installed
     - pause:
-        minutes: 2
+        seconds: 30
   rescue:
     - name: reset master
       command: kubeadm reset --force

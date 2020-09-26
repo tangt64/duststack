@@ -1,4 +1,0 @@
----
-- import_playbook: kubernetes-prepare.yaml
-- import_playbook: kubernetes-install.yaml
-

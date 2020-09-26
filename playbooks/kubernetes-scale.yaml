@@ -1,3 +1,0 @@
----
-- import_playbook: groups/install-docker.yaml
-- import_playbook: groups/install-kubernetes-nodes.yaml

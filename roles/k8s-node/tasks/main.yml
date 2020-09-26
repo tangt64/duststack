@@ -56,10 +56,9 @@
       register: node_result
       when: runtime_enviroment == "crio"
 
-    - debug:
-        msg: The nodes successfully cluster joined
     - pause:
-        minutes: 1
+        seconds: 30
+        prompt: The nodes successfully cluster joined
 
   rescue:
     - name: reset node

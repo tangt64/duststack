@@ -7,10 +7,3 @@
     - { role: virt-vms, when: lab == "openstack" }
     - { role: virt-k8s, when: lab == "kubernetes" }
 
-
-#- name: SSH user key generator 
-#  hosts: all
-#  serial: 1
-#  tags: sshkeygen
-#  role:
-#    - virt-ssh

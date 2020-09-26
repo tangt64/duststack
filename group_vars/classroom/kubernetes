@@ -1,12 +1,12 @@
 k8s_master_nodes:
-  - k8s-master-1
-  - k8s-master-2
-k8s_utility_node:
-  - k8s-utility-node
-k8s_nodes_1:
-  - k8s-node-1
-k8s_nodes_2:
-  - k8s-node-2
+  - k8s_master_1
+  - k8s_master_2
+  - k8s_master_3
+k8s_utility_nodes:
+  - k8s_utility_node
+k8s_nodes:
+  - k8s_node_1
+  - k8s_node_2
 
 virt_disk_format: qcow2
 virt_disk_image_path: /var/lib/libvirt/images/

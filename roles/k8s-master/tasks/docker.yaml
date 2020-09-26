@@ -29,10 +29,9 @@
       no_log: yes
       with_items:
         - "{{ groups['k8s_master'] }}"
-    - debug:
-        msg: The master nodes successfully installed
     - pause:
-        minutes: 1
+        seconds: 30
+        prompt: The master nodes successfully installed
   rescue:
     - name: reset master
       command: kubeadm reset --force

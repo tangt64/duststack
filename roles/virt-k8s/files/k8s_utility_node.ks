@@ -23,8 +23,8 @@ skipx
 # Firewall configuration
 firewall --disabled
 # Network information
-network  --bootproto=static --device=eth0 --gateway=192.168.122.1 --ip=192.168.122.250 --nameserver=8.8.8.8 --netmask=255.255.255.0 --hostname=utility.example.com
-network  --bootproto=static --device=eth1 --ip=192.168.90.250 --netmask=255.255.255.0 --nodns
+network  --bootproto=static --device=eth0 --gateway=192.168.122.1 --ip=192.168.122.200 --nameserver=8.8.8.8 --netmask=255.255.255.0 --hostname=utility.example.com
+network  --bootproto=static --device=eth1 --ip=192.168.90.200 --netmask=255.255.255.0 --nodns
 # Reboot after installation
 reboot
 # System timezone
@@ -44,9 +44,10 @@ hostnamectl set-hostname utility.example.com
 cat <<EOF>> /etc/hosts
 192.168.90.210 master1.example.com master1
 192.168.90.220 master2.example.com master2
-192.168.90.230 node-1.example.com node1
-192.168.90.240 node-2.example.com node2
-192.168.90.250 utility.example.com utility
+192.168.90.230 master3.example.com master3
+192.168.90.240 node1.example.com node1
+192.168.90.250 node2.example.com node2
+192.168.90.200 utility.example.com utility
 EOF
 
 cat <<EOF> /root/.vimrc
