@@ -4,6 +4,8 @@
 
 This Playbook builds for OpenStack/oVirt/Kubernetes Hybrid project playbook. You can use it as want as you can.
 
+** The provisioning problem has been solved. :) **
+
 ## Announcement
 
 - **The placement** has a little problem. It will correct in future. **The Nova service** still useable it.
