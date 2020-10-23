@@ -10,7 +10,7 @@
 
 - name: install libvirt daemon, python-libvirt and httpd packages
   yum:
-    name: ['libvirt-daemon-*','httpd','python2-lxml','python3-lxml']
+    name: ['libvirt-daemon-*','httpd','python-lxml','python3-lxml', 'python36-libvirt']
     state: latest
   when: install_status.rc == 0
 
@@ -22,7 +22,6 @@
     state: enabled
     zone: "{{ item }}"
   with_items:
-    - libvirt
     - public
 
 

@@ -23,8 +23,8 @@ skipx
 # Firewall configuration
 firewall --disabled
 # Network information
-network  --bootproto=static --device=eth1 --ip=192.168.90.120 --netmask=255.255.255.0
 network  --bootproto=static --device=eth0 --gateway=192.168.122.1 --ip=192.168.122.120 --nameserver=8.8.8.8 --netmask=255.255.255.0 --hostname=node2.example.com
+network  --bootproto=static --device=eth1 --ip=192.168.90.120 --netmask=255.255.255.0 --nodefroute
 # Reboot after installation
 reboot
 # System timezone
