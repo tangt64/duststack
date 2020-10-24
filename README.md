@@ -5,6 +5,7 @@
 This Playbook builds for OpenStack/oVirt/Kubernetes Hybrid project playbook. You can use it as want as you can.
 
 ** The provisioning problem has been solved. :) **
+** This playbook would not support a container mode. **
 
 ## Announcement
 
