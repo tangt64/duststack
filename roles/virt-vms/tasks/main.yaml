@@ -14,15 +14,15 @@
     state: latest
   when: install_status.rc == 0
 
-- name: allow http service to firewalld service
-  firewalld:
-    service: http
-    permanent: yes
-    immediate: yes
-    state: enabled
-    zone: "{{ item }}"
-  with_items:
-    - public
+#- name: allow http service to firewalld service
+#  firewalld:
+#    service: http
+#    permanent: yes
+#    immediate: yes
+#    state: enabled
+#    zone: "{{ item }}"
+#  with_items:
+#    - public
 
 
 - name: start libvirt daemon

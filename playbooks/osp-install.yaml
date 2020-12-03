@@ -8,7 +8,7 @@
   hosts: all
   tags: prepare
   roles:
-    - prepare [tang@ws groups]$ cat install-openstack.yaml
+    - prepare
 - name: ha
   hosts: controller
   tags: ha
